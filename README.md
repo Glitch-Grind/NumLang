@@ -1,2 +1,10 @@
 # NumLang
-A simple programming language about math I made in a few days.
+
+NumLang is a lightweight mathematical scripting language.
+
+## Features
+- Variables
+- Math expressions
+- Functions
+- Loops
+- If statements
