@@ -27,9 +27,9 @@
             font-size: 16px;
             padding: 10px;
             outline: none;
-            white-space: pre-wrap;       /* FIX single spacing */
+            white-space: pre-wrap;       /* Single spacing */
             overflow-wrap: normal;
-            direction: ltr;              /* LTR forced */
+            direction: ltr;              /* Force LTR */
             unicode-bidi: plaintext;     /* Prevent bidi issues */
         }
 
@@ -50,6 +50,7 @@
 const keywords = ["let", "print", "if", "else", "func", "return"];
 const editor = document.getElementById("editor");
 
+// Event listeners
 editor.addEventListener("input", highlight);
 editor.addEventListener("keydown", handleEnter);
 
@@ -75,15 +76,17 @@ function highlight() {
             `<span class="keyword">${word}</span>`);
     });
 
-    // Comments
+    // Comments (# ...)
     text = text.replace(/#.*/g, match =>
         `<span class="comment">${match}</span>`);
 
     editor.innerHTML = text;
+
+    // Fix caret position
     placeCaretAtEnd(editor);
 }
 
-// Fix Enter key for single spacing
+// Enter key single-line fix
 function handleEnter(e) {
     if (e.key === "Enter") {
         e.preventDefault();
@@ -91,11 +94,11 @@ function handleEnter(e) {
     }
 }
 
-// Caret at end
+// Caret at the end
 function placeCaretAtEnd(el) {
     el.focus();
-    if (typeof window.getSelection != "undefined"
-        && typeof document.createRange != "undefined") {
+    if (typeof window.getSelection !== "undefined"
+        && typeof document.createRange !== "undefined") {
         const range = document.createRange();
         range.selectNodeContents(el);
         range.collapse(false);
