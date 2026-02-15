@@ -27,10 +27,10 @@
             font-size: 16px;
             padding: 10px;
             outline: none;
-            white-space: pre;
+            white-space: pre-wrap;       /* FIX single spacing */
             overflow-wrap: normal;
-            direction: ltr;          /* FORCE left-to-right */
-            unicode-bidi: plaintext; /* PREVENT weird bidi */
+            direction: ltr;              /* LTR forced */
+            unicode-bidi: plaintext;     /* Prevent bidi issues */
         }
 
         /* Syntax highlighting */
@@ -43,23 +43,24 @@
 <body>
 
 <div id="editor-wrapper">
-    <pre id="editor" contenteditable="true" spellcheck="false"></pre>
+    <div id="editor" contenteditable="true" spellcheck="false"></div>
 </div>
 
 <script>
 const keywords = ["let", "print", "if", "else", "func", "return"];
-
 const editor = document.getElementById("editor");
 
 editor.addEventListener("input", highlight);
+editor.addEventListener("keydown", handleEnter);
 
+// Highlight function
 function highlight() {
     let text = editor.innerText;
 
     // Escape HTML
     text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    // Strings first
+    // Strings
     text = text.replace(/"[^"]*"/g, match =>
         `<span class="string">${match}</span>`);
 
@@ -74,17 +75,23 @@ function highlight() {
             `<span class="keyword">${word}</span>`);
     });
 
-    // Comments (#...)
+    // Comments
     text = text.replace(/#.*/g, match =>
         `<span class="comment">${match}</span>`);
 
     editor.innerHTML = text;
-
-    // Place caret at the end
     placeCaretAtEnd(editor);
 }
 
-// Caret fix
+// Fix Enter key for single spacing
+function handleEnter(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        document.execCommand('insertHTML', false, '\n');
+    }
+}
+
+// Caret at end
 function placeCaretAtEnd(el) {
     el.focus();
     if (typeof window.getSelection != "undefined"
