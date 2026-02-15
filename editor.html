@@ -2,55 +2,48 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NumLang Canvas Editor 😌🔥</title>
+<title>NumLang Canvas IDE 😌🔥</title>
 <style>
-    body {
-        margin: 0;
-        background: #1e1e1e;
-        font-family: monospace;
-        overflow: hidden;
+    body { margin: 0; background: #1e1e1e; font-family: monospace; }
+    canvas { display: block; background: #252526; }
+    #console {
+        width: 100%; height: 200px; background: #1e1e1e; color: #ffffff;
+        font-family: monospace; padding: 10px; overflow: auto;
     }
-    canvas {
-        display: block;
-        background: #252526;
+    #runButton {
+        position: fixed; top: 10px; right: 10px; z-index: 10;
+        padding: 8px 16px; font-size: 16px;
+        background: #569cd6; color: white; border: none; cursor: pointer;
     }
 </style>
 </head>
 <body>
 
 <canvas id="editor"></canvas>
+<button id="runButton">Run NumLang</button>
+<div id="console"></div>
 
 <script>
-// --- Editor Setup ---
+// --- Canvas Editor Setup ---
 const canvas = document.getElementById('editor');
 const ctx = canvas.getContext('2d');
 let width = window.innerWidth;
-let height = window.innerHeight;
+let height = window.innerHeight - 200; // leave space for console
 canvas.width = width;
 canvas.height = height;
 
-// --- Editor State ---
-let lines = [''];  // Each element is a line
+let lines = [''];
 let cursor = { x: 0, y: 0 };
 const lineHeight = 22;
 const padding = 10;
 const keywords = ["let", "print", "if", "else", "func", "return"];
+const colors = { text: "#FFFFFF", keyword: "#569cd6", number: "#b5cea8", string: "#ce9178", comment: "#6a9955", caret: "#ffffff" };
+const consoleDiv = document.getElementById('console');
 
-// --- Colors ---
-const colors = {
-    text: "#FFFFFF",
-    keyword: "#569cd6",
-    number: "#b5cea8",
-    string: "#ce9178",
-    comment: "#6a9955",
-    caret: "#ffffff"
-};
-
-// --- Helper Functions ---
+// --- Editor Functions ---
 function draw() {
     ctx.fillStyle = "#252526";
     ctx.fillRect(0, 0, width, height);
-
     ctx.textBaseline = 'top';
     ctx.font = '16px Consolas';
 
@@ -65,67 +58,45 @@ function draw() {
         }
     }
 
-    // Draw caret
     const caretX = padding + ctx.measureText(lines[cursor.y].slice(0, cursor.x)).width;
     const caretY = padding + cursor.y * lineHeight;
     ctx.fillStyle = colors.caret;
     ctx.fillRect(caretX, caretY, 2, lineHeight);
 }
 
-// --- Tokenizer for syntax highlighting ---
 function tokenize(text) {
     const tokens = [];
     let i = 0;
     while (i < text.length) {
         const char = text[i];
-
-        // Strings
         if (char === '"') {
             let str = '"';
             i++;
-            while (i < text.length && text[i] !== '"') {
-                str += text[i++];
-            }
+            while (i < text.length && text[i] !== '"') str += text[i++];
             if (i < text.length) str += '"';
             i++;
             tokens.push({ text: str, type: 'string' });
             continue;
         }
-
-        // Numbers
         if (/\d/.test(char)) {
             let num = char;
             i++;
-            while (i < text.length && /\d/.test(text[i])) {
-                num += text[i++];
-            }
+            while (i < text.length && /\d/.test(text[i])) num += text[i++];
             tokens.push({ text: num, type: 'number' });
             continue;
         }
-
-        // Comments
-        if (char === '#' && i === 0 || (text[i-1]===' ' && char==='#')) {
+        if (char === '#' && (i===0 || text[i-1]===' ')) {
             let comment = text.slice(i);
             tokens.push({ text: comment, type: 'comment' });
             break;
         }
-
-        // Keywords / words
         if (/\w/.test(char)) {
-            let word = char;
-            i++;
-            while (i < text.length && /\w/.test(text[i])) {
-                word += text[i++];
-            }
-            if (keywords.includes(word)) {
-                tokens.push({ text: word, type: 'keyword' });
-            } else {
-                tokens.push({ text: word, type: 'text' });
-            }
+            let word = char; i++;
+            while (i < text.length && /\w/.test(text[i])) word += text[i++];
+            if (keywords.includes(word)) tokens.push({ text: word, type: 'keyword' });
+            else tokens.push({ text: word, type: 'text' });
             continue;
         }
-
-        // Other characters
         tokens.push({ text: char, type: 'text' });
         i++;
     }
@@ -133,68 +104,49 @@ function tokenize(text) {
 }
 
 // --- Keyboard Input ---
-window.addEventListener('keydown', (e) => {
+window.addEventListener('keydown', e => {
     const line = lines[cursor.y];
     if (e.key === 'Backspace') {
-        if (cursor.x > 0) {
-            lines[cursor.y] = line.slice(0, cursor.x - 1) + line.slice(cursor.x);
-            cursor.x--;
-        } else if (cursor.y > 0) {
-            const prev = lines[cursor.y - 1];
-            cursor.x = prev.length;
-            lines[cursor.y - 1] += line;
-            lines.splice(cursor.y, 1);
-            cursor.y--;
-        }
-    } else if (e.key === 'Enter') {
-        const rest = line.slice(cursor.x);
-        lines[cursor.y] = line.slice(0, cursor.x);
-        lines.splice(cursor.y + 1, 0, rest);
-        cursor.y++;
-        cursor.x = 0;
-    } else if (e.key === 'ArrowLeft') {
-        if (cursor.x > 0) cursor.x--;
-        else if (cursor.y > 0) {
-            cursor.y--;
-            cursor.x = lines[cursor.y].length;
-        }
-    } else if (e.key === 'ArrowRight') {
-        if (cursor.x < line.length) cursor.x++;
-        else if (cursor.y < lines.length - 1) {
-            cursor.y++;
-            cursor.x = 0;
-        }
-    } else if (e.key === 'ArrowUp') {
-        if (cursor.y > 0) {
-            cursor.y--;
-            cursor.x = Math.min(cursor.x, lines[cursor.y].length);
-        }
-    } else if (e.key === 'ArrowDown') {
-        if (cursor.y < lines.length - 1) {
-            cursor.y++;
-            cursor.x = Math.min(cursor.x, lines[cursor.y].length);
-        }
-    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-        // Insert character
-        lines[cursor.y] = line.slice(0, cursor.x) + e.key + line.slice(cursor.x);
-        cursor.x++;
-    }
+        if (cursor.x > 0) { lines[cursor.y] = line.slice(0,cursor.x-1)+line.slice(cursor.x); cursor.x--; }
+        else if (cursor.y>0) { const prev=lines[cursor.y-1]; cursor.x=prev.length; lines[cursor.y-1]+=line; lines.splice(cursor.y,1); cursor.y--; }
+    } else if (e.key==='Enter') { const rest=line.slice(cursor.x); lines[cursor.y]=line.slice(0,cursor.x); lines.splice(cursor.y+1,0,rest); cursor.y++; cursor.x=0; }
+    else if (e.key==='ArrowLeft') { if(cursor.x>0) cursor.x--; else if(cursor.y>0){ cursor.y--; cursor.x=lines[cursor.y].length; } }
+    else if (e.key==='ArrowRight') { if(cursor.x<line.length) cursor.x++; else if(cursor.y<lines.length-1){ cursor.y++; cursor.x=0; } }
+    else if (e.key==='ArrowUp') { if(cursor.y>0){ cursor.y--; cursor.x=Math.min(cursor.x, lines[cursor.y].length);} }
+    else if (e.key==='ArrowDown'){ if(cursor.y<lines.length-1){ cursor.y++; cursor.x=Math.min(cursor.x, lines[cursor.y].length);} }
+    else if (e.key.length===1 && !e.ctrlKey && !e.metaKey){ lines[cursor.y]=line.slice(0,cursor.x)+e.key+line.slice(cursor.x); cursor.x++; }
     e.preventDefault();
     draw();
 });
 
-// --- Window Resize ---
-window.addEventListener('resize', () => {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
+// --- Caret ---
+function placeCaretAtEnd(el){el.focus();}
+
+// --- Resize ---
+window.addEventListener('resize', ()=>{
+    width=window.innerWidth; height=window.innerHeight-200;
+    canvas.width=width; canvas.height=height;
     draw();
 });
 
-// Initial draw
+// --- Initial Draw ---
 draw();
-</script>
 
+// --- Run NumLang Button ---
+document.getElementById('runButton').addEventListener('click', async () => {
+    const code = lines.join('\n');
+    try {
+        const response = await fetch('http://localhost:5000/run', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const result = await response.text();
+        consoleDiv.innerText = result;
+    } catch(err) {
+        consoleDiv.innerText = 'Error connecting to server: '+err;
+    }
+});
+</script>
 </body>
 </html>
