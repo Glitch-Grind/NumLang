@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NumLang Editor 😌🔥</title>
+    <style>
+        body {
+            background: #1e1e1e;
+            color: white;
+            font-family: Consolas;
+        }
+
+        #editor {
+            width: 100%;
+            height: 95vh;
+            background: #252526;
+            color: white;
+            border: none;
+            outline: none;
+            padding: 10px;
+            font-size: 16px;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: scroll;
+        }
+
+        .keyword { color: #569cd6; }
+        .number { color: #b5cea8; }
+        .string { color: #ce9178; }
+    </style>
+</head>
+<body>
+
+<div id="editor" contenteditable="true"></div>
+
+<script>
+const keywords = ["let", "print", "if", "else", "func", "return"];
+
+const editor = document.getElementById("editor");
+
+editor.addEventListener("input", highlight);
+
+function highlight() {
+    let text = editor.innerText;
+
+    // Escape HTML
+    text = text.replace(/</g, "&lt;");
+
+    // Strings
+    text = text.replace(/"[^"]*"/g, match =>
+        `<span class="string">${match}</span>`);
+
+    // Numbers
+    text = text.replace(/\b\d+\b/g, match =>
+        `<span class="number">${match}</span>`);
+
+    // Keywords
+    keywords.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, "g");
+        text = text.replace(regex,
+            `<span class="keyword">${word}</span>`);
+    });
+
+    editor.innerHTML = text;
+}
+</script>
+
+</body>
+</html>
+
