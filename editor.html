@@ -1,280 +1,171 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>NumLang IDE</title>
+<title>NumLang Editor</title>
 
 <style>
-    body {
-        margin: 0;
-        background: #1e1e1e;
-        font-family: Consolas, monospace;
-        overflow: hidden;
-    }
+@font-face {
+    font-family: "JetBrainsMono";
+    src: url("fonts/JetBrainsMono-Regular.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+}
 
-    canvas {
-        display: block;
-        background: #252526;
-    }
+body {
+    margin: 0;
+    background: #0f111a;
+    overflow: hidden;
+    font-family: "JetBrainsMono", Consolas, monospace;
+}
 
-    #console {
-        height: 200px;
-        background: #1b1b1b;
-        color: white;
-        padding: 10px;
-        overflow-y: auto;
-        border-top: 2px solid #333;
-    }
-
-    #runButton {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        padding: 10px 18px;
-        font-size: 14px;
-        background: #0e639c;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    #runButton:hover {
-        background: #1177bb;
-    }
+canvas {
+    display: block;
+}
 </style>
 </head>
 
 <body>
-
 <canvas id="editor"></canvas>
-<button id="runButton">Run</button>
-<div id="console"></div>
 
 <script>
 const canvas = document.getElementById("editor");
 const ctx = canvas.getContext("2d");
 
-let width = window.innerWidth;
-let height = window.innerHeight - 200;
-
-canvas.width = width;
-canvas.height = height;
-
-const padding = 10;
-const lineHeight = 22;
-const numberColumnWidth = 40;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let lines = [""];
-let cursor = { x: 0, y: 0 };
+let cursorX = 0;
+let cursorY = 0;
+let showCaret = true;
 
-const keywords = ["let", "print"];
-const colors = {
-    background: "#252526",
-    text: "#d4d4d4",
-    keyword: "#569cd6",
-    number: "#b5cea8",
-    string: "#ce9178",
-    comment: "#6a9955",
-    lineNumber: "#858585",
-    caret: "#ffffff"
-};
+const fontSize = 16;
+const lineHeight = 24;
+const padding = 60;
 
-let caretVisible = true;
+ctx.font = fontSize + "px JetBrainsMono, Consolas, monospace";
 
-// --- Blinking caret ---
+function draw() {
+    ctx.fillStyle = "#0f111a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    lines.forEach((line, i) => {
+        const y = (i + 1) * lineHeight;
+
+        // Line numbers
+        ctx.fillStyle = "#3b4261";
+        ctx.fillText(i + 1, 20, y);
+
+        drawHighlightedText(line, padding, y);
+    });
+
+    if (showCaret) drawCaret();
+}
+
+function drawHighlightedText(text, x, y) {
+    const tokens = text.split(/(\s+)/);
+
+    let offsetX = x;
+
+    tokens.forEach(token => {
+        ctx.fillStyle = getTokenColor(token);
+        ctx.fillText(token, offsetX, y);
+        offsetX += ctx.measureText(token).width;
+    });
+}
+
+function getTokenColor(token) {
+    if (/^\d+(\.\d+)?$/.test(token)) return "#89ddff"; // numbers
+    if (/^(let|print)$/.test(token)) return "#c792ea"; // keywords
+    if (/^(sqrt|sin|cos|tan|log)$/.test(token)) return "#82aaff"; // functions
+    if (/^[=+\-*/^()]+$/.test(token)) return "#ffcb6b"; // operators
+    return "#d4d4d4"; // default
+}
+
+function drawCaret() {
+    const textBeforeCursor = lines[cursorY].slice(0, cursorX);
+    const x = padding + ctx.measureText(textBeforeCursor).width;
+    const y = cursorY * lineHeight + 8;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(x, y, 2, lineHeight - 10);
+}
+
 setInterval(() => {
-    caretVisible = !caretVisible;
+    showCaret = !showCaret;
     draw();
 }, 500);
 
-// --- Tokenizer ---
-function tokenize(text) {
-    const tokens = [];
-    let i = 0;
-
-    while (i < text.length) {
-        const char = text[i];
-
-        if (char === '"') {
-            let str = '"';
-            i++;
-            while (i < text.length && text[i] !== '"') str += text[i++];
-            if (i < text.length) str += '"';
-            i++;
-            tokens.push({ text: str, type: "string" });
-            continue;
-        }
-
-        if (/\d/.test(char)) {
-            let num = char;
-            i++;
-            while (i < text.length && /\d/.test(text[i])) num += text[i++];
-            tokens.push({ text: num, type: "number" });
-            continue;
-        }
-
-        if (char === "#") {
-            tokens.push({ text: text.slice(i), type: "comment" });
-            break;
-        }
-
-        if (/\w/.test(char)) {
-            let word = char;
-            i++;
-            while (i < text.length && /\w/.test(text[i])) word += text[i++];
-            if (keywords.includes(word))
-                tokens.push({ text: word, type: "keyword" });
-            else
-                tokens.push({ text: word, type: "text" });
-            continue;
-        }
-
-        tokens.push({ text: char, type: "text" });
-        i++;
-    }
-
-    return tokens;
-}
-
-// --- Drawing ---
-function draw() {
-    ctx.fillStyle = colors.background;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.font = "16px Consolas";
-    ctx.textBaseline = "top";
-
-    for (let i = 0; i < lines.length; i++) {
-        const y = padding + i * lineHeight;
-
-        // Line numbers
-        ctx.fillStyle = colors.lineNumber;
-        ctx.fillText(i + 1, padding, y);
-
-        // Code
-        const tokens = tokenize(lines[i]);
-        let x = padding + numberColumnWidth;
-
-        for (const token of tokens) {
-            ctx.fillStyle = colors[token.type] || colors.text;
-            ctx.fillText(token.text, x, y);
-            x += ctx.measureText(token.text).width;
-        }
-    }
-
-    // Caret
-    if (caretVisible) {
-        const caretX =
-            padding +
-            numberColumnWidth +
-            ctx.measureText(lines[cursor.y].slice(0, cursor.x)).width;
-
-        const caretY = padding + cursor.y * lineHeight;
-
-        ctx.fillStyle = colors.caret;
-        ctx.fillRect(caretX, caretY, 2, lineHeight);
-    }
-}
-
-// --- Keyboard Handling ---
-window.addEventListener("keydown", e => {
-    const line = lines[cursor.y];
+document.addEventListener("keydown", e => {
+    const line = lines[cursorY];
 
     if (e.key === "Backspace") {
-        if (cursor.x > 0) {
-            lines[cursor.y] =
-                line.slice(0, cursor.x - 1) + line.slice(cursor.x);
-            cursor.x--;
-        } else if (cursor.y > 0) {
-            const prev = lines[cursor.y - 1];
-            cursor.x = prev.length;
-            lines[cursor.y - 1] += line;
-            lines.splice(cursor.y, 1);
-            cursor.y--;
+        if (cursorX > 0) {
+            lines[cursorY] =
+                line.slice(0, cursorX - 1) +
+                line.slice(cursorX);
+            cursorX--;
+        } else if (cursorY > 0) {
+            cursorX = lines[cursorY - 1].length;
+            lines[cursorY - 1] += line;
+            lines.splice(cursorY, 1);
+            cursorY--;
         }
     }
 
     else if (e.key === "Enter") {
-        const indent = line.match(/^\s*/)[0]; // auto indentation
-        const rest = line.slice(cursor.x);
+        const newLine = line.slice(cursorX);
+        lines[cursorY] = line.slice(0, cursorX);
+        lines.splice(cursorY + 1, 0, newLine);
 
-        lines[cursor.y] = line.slice(0, cursor.x);
-        lines.splice(cursor.y + 1, 0, indent + rest);
-
-        cursor.y++;
-        cursor.x = indent.length;
+        cursorY++;
+        cursorX = 0;
     }
 
     else if (e.key === "ArrowLeft") {
-        if (cursor.x > 0) cursor.x--;
-        else if (cursor.y > 0) {
-            cursor.y--;
-            cursor.x = lines[cursor.y].length;
+        if (cursorX > 0) cursorX--;
+        else if (cursorY > 0) {
+            cursorY--;
+            cursorX = lines[cursorY].length;
         }
     }
 
     else if (e.key === "ArrowRight") {
-        if (cursor.x < line.length) cursor.x++;
-        else if (cursor.y < lines.length - 1) {
-            cursor.y++;
-            cursor.x = 0;
+        if (cursorX < line.length) cursorX++;
+        else if (cursorY < lines.length - 1) {
+            cursorY++;
+            cursorX = 0;
         }
     }
 
     else if (e.key === "ArrowUp") {
-        if (cursor.y > 0) {
-            cursor.y--;
-            cursor.x = Math.min(cursor.x, lines[cursor.y].length);
+        if (cursorY > 0) {
+            cursorY--;
+            cursorX = Math.min(cursorX, lines[cursorY].length);
         }
     }
 
     else if (e.key === "ArrowDown") {
-        if (cursor.y < lines.length - 1) {
-            cursor.y++;
-            cursor.x = Math.min(cursor.x, lines[cursor.y].length);
+        if (cursorY < lines.length - 1) {
+            cursorY++;
+            cursorX = Math.min(cursorX, lines[cursorY].length);
         }
     }
 
-    else if (e.key.length === 1 && !e.ctrlKey) {
-        lines[cursor.y] =
-            line.slice(0, cursor.x) + e.key + line.slice(cursor.x);
-        cursor.x++;
+    else if (e.key.length === 1) {
+        lines[cursorY] =
+            line.slice(0, cursorX) +
+            e.key +
+            line.slice(cursorX);
+
+        cursorX++;
     }
 
-    e.preventDefault();
-    caretVisible = true;
     draw();
-});
-
-window.addEventListener("resize", () => {
-    width = window.innerWidth;
-    height = window.innerHeight - 200;
-    canvas.width = width;
-    canvas.height = height;
-    draw();
-});
-
-// --- Run Button ---
-document.getElementById("runButton").addEventListener("click", async () => {
-    const code = lines.join("\n");
-
-    try {
-        const response = await fetch("http://localhost:5000/run", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code })
-        });
-
-        const result = await response.text();
-        document.getElementById("console").innerText = result;
-    } catch (err) {
-        document.getElementById("console").innerText = err;
-    }
 });
 
 draw();
 </script>
-
 </body>
 </html>
