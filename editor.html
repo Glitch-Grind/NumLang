@@ -597,6 +597,63 @@ document.addEventListener("keydown", e => {
     
     // Keyboard shortcuts
     if (e.ctrlKey || e.metaKey) {
+        // Clipboard: copy current line
+        if (e.key === "c") {
+            e.preventDefault();
+            const text = lines[cursorY] || "";
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => {});
+            }
+            return;
+        }
+
+        // Cut current line
+        if (e.key === "x") {
+            e.preventDefault();
+            const text = lines[cursorY] || "";
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => {});
+            }
+            lines.splice(cursorY, 1);
+            if (lines.length === 0) lines = [""];
+            if (cursorY >= lines.length) cursorY = lines.length - 1;
+            cursorX = Math.min(cursorX, lines[cursorY].length);
+            draw();
+            return;
+        }
+
+        // Paste at cursor (handles multi-line paste)
+        if (e.key === "v") {
+            e.preventDefault();
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                navigator.clipboard.readText().then(clip => {
+                    if (!clip) return;
+                    const line = lines[cursorY];
+                    const before = line.slice(0, cursorX);
+                    const after = line.slice(cursorX);
+                    const insertLines = clip.split(/\r?\n/);
+                    if (insertLines.length === 1) {
+                        lines[cursorY] = before + insertLines[0] + after;
+                        cursorX = (before + insertLines[0]).length;
+                    } else {
+                        // first line merges with before
+                        lines[cursorY] = before + insertLines[0];
+                        // middle lines inserted
+                        for (let k = 1; k < insertLines.length - 1; k++) {
+                            lines.splice(cursorY + k, 0, insertLines[k]);
+                        }
+                        // last line merges with after
+                        lines.splice(cursorY + insertLines.length - 1, 0, insertLines[insertLines.length - 1] + after);
+                        cursorY = cursorY + insertLines.length - 1;
+                        cursorX = insertLines[insertLines.length - 1].length;
+                    }
+                    draw();
+                }).catch(() => {});
+            }
+            return;
+        }
+
+        // Existing shortcuts: save/open
         if (e.key === "s") {
             e.preventDefault();
             saveFile();
