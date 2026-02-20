@@ -2,6 +2,8 @@ import math
 import os
 import json
 import traceback
+import random
+import statistics
 
 variables = {}
 user_functions = {}
@@ -18,6 +20,10 @@ math_env = {
     "round": round,
     "exp": math.exp,
     "pow": pow,
+    "fabs": math.fabs,
+    "factorial": math.factorial,
+    "gcd": math.gcd,
+    "lcm": math.lcm,
     
     # Trigonometry
     "sin": math.sin,
@@ -26,13 +32,18 @@ math_env = {
     "asin": math.asin,
     "acos": math.acos,
     "atan": math.atan,
+    "atan2": math.atan2,
+    "sinh": math.sinh,
+    "cosh": math.cosh,
+    "tanh": math.tanh,
     "deg": math.degrees,
     "rad": math.radians,
     
-    # Logarithms
+    # Logarithms & exponents
     "log": math.log,
     "log10": math.log10,
     "log2": math.log2,
+    "log1p": math.log1p,
     
     # Constants
     "pi": math.pi,
@@ -130,14 +141,224 @@ def builtin_append_file(filename, content):
     except Exception as e:
         raise Exception(f"Error appending to file: {str(e)}")
 
+# ========== STATISTICS FUNCTIONS ==========
+def builtin_sum(lst):
+    """Sum of list elements"""
+    if isinstance(lst, list):
+        return sum(lst)
+    raise TypeError(f"sum() requires a list")
+
+def builtin_min(lst):
+    """Minimum value in list"""
+    if isinstance(lst, list) and len(lst) > 0:
+        return min(lst)
+    raise ValueError(f"min() requires non-empty list")
+
+def builtin_max(lst):
+    """Maximum value in list"""
+    if isinstance(lst, list) and len(lst) > 0:
+        return max(lst)
+    raise ValueError(f"max() requires non-empty list")
+
+def builtin_mean(lst):
+    """Average of list elements"""
+    if isinstance(lst, list) and len(lst) > 0:
+        return statistics.mean(lst)
+    raise ValueError(f"mean() requires non-empty list")
+
+def builtin_median(lst):
+    """Median of list elements"""
+    if isinstance(lst, list) and len(lst) > 0:
+        return statistics.median(lst)
+    raise ValueError(f"median() requires non-empty list")
+
+def builtin_stdev(lst):
+    """Standard deviation of list"""
+    if isinstance(lst, list) and len(lst) > 1:
+        return statistics.stdev(lst)
+    raise ValueError(f"stdev() requires list with at least 2 elements")
+
+def builtin_avg(lst):
+    """Alias for mean"""
+    return builtin_mean(lst)
+
+# ========== RANDOM NUMBER FUNCTIONS ==========
+def builtin_random():
+    """Random float between 0 and 1"""
+    return random.random()
+
+def builtin_randint(a, b):
+    """Random integer between a and b (inclusive)"""
+    return random.randint(int(a), int(b))
+
+def builtin_choice(lst):
+    """Random choice from list"""
+    if isinstance(lst, list) and len(lst) > 0:
+        return random.choice(lst)
+    raise ValueError(f"choice() requires non-empty list")
+
+def builtin_shuffle(lst):
+    """Shuffle a list in-place"""
+    if isinstance(lst, list):
+        random.shuffle(lst)
+        return lst
+    raise TypeError(f"shuffle() requires a list")
+
+# ========== TYPE CONVERSION ==========
+def builtin_int(val):
+    """Convert to integer"""
+    try:
+        return int(float(str(val)))
+    except:
+        raise ValueError(f"Cannot convert {val} to integer")
+
+def builtin_float(val):
+    """Convert to float"""
+    try:
+        return float(val)
+    except:
+        raise ValueError(f"Cannot convert {val} to float")
+
+def builtin_str(val):
+    """Convert to string"""
+    return str(val)
+
+def builtin_bool(val):
+    """Convert to boolean"""
+    if isinstance(val, (int, float)):
+        return val != 0
+    elif isinstance(val, str):
+        return val.lower() in ('true', '1', 'yes')
+    return bool(val)
+
+# ========== ADVANCED STRING METHODS ==========
+def builtin_replace(s, old, new):
+    """Replace substring"""
+    if isinstance(s, str):
+        return s.replace(old, new)
+    raise TypeError(f"replace() requires a string")
+
+def builtin_strip(s):
+    """Remove whitespace from ends"""
+    if isinstance(s, str):
+        return s.strip()
+    raise TypeError(f"strip() requires a string")
+
+def builtin_startswith(s, prefix):
+    """Check if string starts with prefix"""
+    if isinstance(s, str):
+        return s.startswith(prefix)
+    raise TypeError(f"startswith() requires a string")
+
+def builtin_endswith(s, suffix):
+    """Check if string ends with suffix"""
+    if isinstance(s, str):
+        return s.endswith(suffix)
+    raise TypeError(f"endswith() requires a string")
+
+def builtin_contains(s, substr):
+    """Check if string contains substring"""
+    if isinstance(s, str):
+        return substr in s
+    raise TypeError(f"contains() requires a string")
+
+def builtin_find(s, substr):
+    """Find index of substring (-1 if not found)"""
+    if isinstance(s, str):
+        return s.find(substr)
+    raise TypeError(f"find() requires a string")
+
+# ========== ADVANCED LIST METHODS ==========
+def builtin_reverse(lst):
+    """Reverse a list in-place"""
+    if isinstance(lst, list):
+        lst.reverse()
+        return lst
+    raise TypeError(f"reverse() requires a list")
+
+def builtin_sort(lst):
+    """Sort a list in-place"""
+    if isinstance(lst, list):
+        try:
+            lst.sort()
+            return lst
+        except:
+            raise ValueError(f"Cannot sort list with incompatible types")
+    raise TypeError(f"sort() requires a list")
+
+def builtin_clear(lst):
+    """Clear a list"""
+    if isinstance(lst, list):
+        lst.clear()
+        return lst
+    raise TypeError(f"clear() requires a list")
+
+def builtin_count(lst, item):
+    """Count occurrences in list"""
+    if isinstance(lst, list):
+        return lst.count(item)
+    raise TypeError(f"count() requires a list")
+
+def builtin_index_of(lst, item):
+    """Find index of item (-1 if not found)"""
+    if isinstance(lst, list):
+        try:
+            return lst.index(item)
+        except ValueError:
+            return -1
+    raise TypeError(f"index() requires a list")
+
+def builtin_range_list(start, end):
+    """Create list of integers from start to end"""
+    return NumLangList(range(int(start), int(end) + 1))
+
 builtin_functions = {
     "len": builtin_len,
     "append": builtin_append,
     "pop": builtin_pop,
+    
+    # String methods
     "upper": builtin_upper,
     "lower": builtin_lower,
     "split": builtin_split,
     "join": builtin_join,
+    "replace": builtin_replace,
+    "strip": builtin_strip,
+    "startswith": builtin_startswith,
+    "endswith": builtin_endswith,
+    "contains": builtin_contains,
+    "find": builtin_find,
+    
+    # List methods
+    "reverse": builtin_reverse,
+    "sort": builtin_sort,
+    "clear": builtin_clear,
+    "count": builtin_count,
+    "index": builtin_index_of,
+    "range": builtin_range_list,
+    
+    # Statistics
+    "sum": builtin_sum,
+    "min": builtin_min,
+    "max": builtin_max,
+    "mean": builtin_mean,
+    "avg": builtin_avg,
+    "median": builtin_median,
+    "stdev": builtin_stdev,
+    
+    # Random
+    "random": builtin_random,
+    "randint": builtin_randint,
+    "choice": builtin_choice,
+    "shuffle": builtin_shuffle,
+    
+    # Type conversion
+    "int": builtin_int,
+    "float": builtin_float,
+    "str": builtin_str,
+    "bool": builtin_bool,
+    
+    # File I/O
     "read_file": builtin_read_file,
     "write_file": builtin_write_file,
     "append_file": builtin_append_file,
@@ -418,7 +639,100 @@ def run_code(code, reset_state=True, debug=False):
                 else:
                     raise Exception(f"Invalid for loop syntax. Expected: for var = start to end do")
             
-            # End statement (handled by if/for)
+            # While loop
+            elif line.startswith("while "):
+                condition_str = line[6:].strip()
+                
+                # Check for "do" keyword
+                if " do" in condition_str:
+                    condition_str = condition_str.split(" do")[0].strip()
+                
+                # Find the matching "end"
+                while_block = []
+                i += 1
+                depth = 1
+                
+                while i < len(lines) and depth > 0:
+                    current_line = lines[i].strip()
+                    if current_line.startswith("while "):
+                        depth += 1
+                    elif current_line == "end" or current_line.startswith("end "):
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    
+                    if depth > 0:
+                        while_block.append(lines[i])
+                    i += 1
+                
+                # Execute while loop (don't reset state)
+                while_code = "\n".join(while_block)
+                max_iterations = 100000  # Prevent infinite loops
+                iteration = 0
+                
+                while iteration < max_iterations:
+                    try:
+                        condition = parse_condition(condition_str, line_num)
+                        is_true = check_condition(*condition)
+                    except:
+                        is_true = False
+                    
+                    if not is_true:
+                        break
+                    
+                    loop_output = run_code(while_code, reset_state=False, debug=debug_mode)
+                    if loop_output:
+                        output.append(loop_output)
+                    iteration += 1
+                
+                if iteration >= max_iterations:
+                    output.append(f"ERROR: Line {line_num}: While loop exceeded maximum iterations ({max_iterations})")
+                
+                i += 1
+            
+            # Try/Catch error handling
+            elif line.startswith("try"):
+                # Find the matching "catch"
+                try_block = []
+                i += 1
+                
+                while i < len(lines):
+                    current_line = lines[i].strip()
+                    if current_line.startswith("catch"):
+                        break
+                    try_block.append(lines[i])
+                    i += 1
+                
+                # Find catch block
+                catch_block = []
+                if i < len(lines) and lines[i].strip().startswith("catch"):
+                    i += 1
+                    while i < len(lines):
+                        current_line = lines[i].strip()
+                        if current_line == "end" or current_line.startswith("end "):
+                            break
+                        catch_block.append(lines[i])
+                        i += 1
+                
+                # Execute try block
+                try_code = "\n".join(try_block)
+                try:
+                    try_output = run_code(try_code, reset_state=False, debug=debug_mode)
+                    if try_output and not try_output.startswith("ERROR"):
+                        output.append(try_output)
+                except Exception as e:
+                    # Execute catch block
+                    if catch_block:
+                        # Set error variable
+                        variables["error"] = str(e)
+                        catch_code = "\n".join(catch_block)
+                        catch_output = run_code(catch_code, reset_state=False, debug=debug_mode)
+                        if catch_output:
+                            output.append(catch_output)
+                
+                i += 1
+            
+            # End statement (handled by if/for/while)
             elif line == "end" or line.startswith("end "):
                 i += 1
             

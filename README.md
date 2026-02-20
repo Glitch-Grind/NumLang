@@ -1,6 +1,6 @@
 # NumLang
 
-A lightweight programming language designed for mathematical computations, data manipulation, and algorithmic thinking with a **web-based IDE** featuring syntax highlighting, control flow, and live execution.
+A **complete** programming language designed for mathematical computations, data manipulation, and scientific problem-solving with a **web-based IDE** featuring syntax highlighting, control flow, and live execution.
 
 **File Extension:** `.numlang`
 
@@ -77,7 +77,18 @@ print message                  # Output: Hello, World!
 - `tan(x)` - Tangent (radians)
 - `asin(x)` - Arc sine
 - `acos(x)` - Arc cosine
-- `atan(x)` - Arc tangent
+**Advanced Math:**
+- `factorial(x)` - Factorial of x
+- `gcd(a, b)` - Greatest common divisor
+- `lcm(a, b)` - Least common multiple
+- `fabs(x)` - Absolute value (float)
+- `sinh(x)`, `cosh(x)`, `tanh(x)` - Hyperbolic functions
+- `log1p(x)` - Natural log of (1 + x)
+
+**Trigonometry:**
+- `sin(x)`, `cos(x)`, `tan(x)` - Trig functions (radians)
+- `asin(x)`, `acos(x)`, `atan(x)` - Arc trig functions
+- `atan2(y, x)` - Two-argument arctangent
 - `deg(x)` - Convert radians to degrees
 - `rad(x)` - Convert degrees to radians
 
@@ -86,16 +97,49 @@ print message                  # Output: Hello, World!
 - `log10(x)` - Base 10 logarithm
 - `log2(x)` - Base 2 logarithm
 
+**Statistics Functions:**
+- `sum(list)` - Sum of all elements
+- `min(list)` - Minimum value
+- `max(list)` - Maximum value
+- `mean(list)` - Average (mean) value
+- `avg(list)` - Alias for mean
+- `median(list)` - Median value
+- `stdev(list)` - Standard deviation
+
+**Random Number Generation:**
+- `random()` - Random float between 0 and 1
+- `randint(a, b)` - Random integer between a and b
+- `choice(list)` - Random element from list
+- `shuffle(list)` - Shuffle list in-place
+
 **String Operations:**
 - `upper(s)` - Convert to uppercase
 - `lower(s)` - Convert to lowercase
 - `split(s, sep)` - Split string into list
 - `join(list, sep)` - Join list into string
+- `replace(s, old, new)` - Replace substring
+- `strip(s)` - Remove leading/trailing whitespace
+- `startswith(s, prefix)` - Check string prefix
+- `endswith(s, suffix)` - Check string suffix
+- `contains(s, substr)` - Check if substring exists
+- `find(s, substr)` - Find index of substring
 
 **List Operations:**
 - `append(list, item)` - Add item to list
-- `pop(list, index)` - Remove and return item from list
+- `pop(list, index)` - Remove and return item
+- `sort(list)` - Sort list in-place
+- `reverse(list)` - Reverse list in-place
+- `clear(list)` - Clear all items
+- `count(list, item)` - Count occurrences
+- `index(list, item)` - Find index of item
 - `len(list)` - Get list length
+- `range(start, end)` - Create list of integers
+
+**Type Conversion:**
+- `int(value)` - Convert to integer
+- `float(value)` - Convert to float
+- `str(value)` - Convert to string
+- `bool(value)` - Convert to boolean
 
 **File I/O:**
 - `read_file(filename)` - Read file contents
@@ -141,7 +185,8 @@ end
 ```
 
 ### Loops
-Use `for/do/end` for iteration:
+
+**For Loops** - Iterate over a range:
 ```numlang
 for i = 1 to 10 do
     print i
@@ -154,6 +199,44 @@ for i = 1 to 5 do
 end
 print fact
 ```
+
+**While Loops** - Repeat while condition is true:
+```numlang
+let x = 0
+while x < 5 do
+    print x
+    let x = x + 1
+end
+
+# Sum until value reaches threshold
+let sum = 0
+let i = 1
+while sum < 100 do
+    let sum = sum + i
+    let i = i + 1
+end
+print sum
+```
+
+### Error Handling
+
+**Try/Catch** - Handle errors gracefully:
+```numlang
+try
+    let result = read_file("nonexistent.txt")
+    print result
+catch
+    print "File not found - caught error"
+end
+
+# Access error details
+try
+    let x = 10 / 0
+catch
+    print error
+end
+```
+````
 
 ### User-Defined Functions
 Define your own functions:
@@ -349,59 +432,96 @@ Example session:
 
 ---
 
-## ✨ Current Features (v1.2)
+## ✨ Current Features (v1.3 - FINAL)
 
 ### Core Language
 - ✅ **Variables** - `let` keyword for variable assignment
-- ✅ **Functions** - User-defined functions with parameters
-- ✅ **Control Flow** - `if/then/end` conditionals and `for/do/end` loops
-- ✅ **Comments** - `#` for single-line comments
+- ✅ **User-Defined Functions** - Define and call reusable functions with parameters
+- ✅ **Full Control Flow** - `if/then/end`, `for/do/end`, `while/do/end` loops
+- ✅ **Error Handling** - `try/catch/end` blocks for graceful error handling
+- ✅ **Comments** - `#` for single and inline comments
 
-### Data Types
-- ✅ **Numbers** - Integers and floating-point numbers
-- ✅ **Strings** - Text manipulation with concatenation using `.`
-- ✅ **Lists** - Dynamic arrays with append/pop operations
-
-### Operations & Functions
-- ✅ **Math Operators** - `+`, `-`, `*`, `/`, `^` (power), `%` (modulo), `//` (integer division)
+### Data Types & Operations
+- ✅ **Numbers** - Integers and floating-point arithmetic
+- ✅ **Strings** - Full text manipulation with concatenation (`.` operator)
+- ✅ **Lists** - Dynamic arrays with 10+ built-in methods
+- ✅ **Math Operators** - `+`, `-`, `*`, `/`, `^`, `%`, `//`
 - ✅ **Comparison** - `>`, `<`, `>=`, `<=`, `==`, `!=`
-- ✅ **String Concatenation** - `.` operator for joining strings
-- ✅ **20+ Math Functions** - sqrt, sin, cos, tan, log, exp, pow, abs, floor, ceil, round, deg, rad, etc.
-- ✅ **String Functions** - upper, lower, split, join, len
-- ✅ **List Functions** - append, pop, len
-- ✅ **File I/O** - read_file, write_file, append_file
-- ✅ **Math Constants** - pi, e, tau, inf, nan
+
+### Mathematical Functions (50+)
+- ✅ **Basic Math** - sqrt, abs, floor, ceil, round, factorial, gcd, lcm, exp, pow
+- ✅ **Trigonometry** - sin, cos, tan, asin, acos, atan, atan2, sinh, cosh, tanh
+- ✅ **Logarithms** - log, log10, log2, log1p
+- ✅ **Degree/Radian** - deg(convert to degrees), rad(convert to radians)
+- ✅ **20+ Math Constants** - pi, e, tau, inf, nan
+
+### Statistics & Data Analysis
+- ✅ **Statistical Functions** - sum, min, max, mean, median, stdev, avg
+- ✅ **Random Generation** - random, randint, choice, shuffle
+- ✅ **Type Conversion** - int, float, str, bool
+
+### String Operations (10+ methods)
+- ✅ **Case Conversion** - upper, lower
+- ✅ **Manipulation** - split, join, replace, strip
+- ✅ **Search** - find, contains, startswith, endswith
+- ✅ **Length** - len
+
+### List Operations (10+ methods)
+- ✅ **Modification** - append, pop, sort, reverse, clear
+- ✅ **Search** - count, index, choice
+- ✅ **Generation** - range
+- ✅ **Shuffling** - shuffle
+
+### File I/O
+- ✅ **Read/Write** - read_file, write_file, append_file
+- ✅ **Error Handling** - Graceful file error handling with try/catch
 
 ### IDE Features
-- ✅ **Canvas-based Editor** - Custom-built with smooth text rendering
-- ✅ **Syntax Highlighting** - Color-coded keywords, numbers, functions, operators, constants
-- ✅ **Live Execution** - Run code instantly from the browser
-- ✅ **Error Identification** - Visual indication of lines with errors
-- ✅ **File Operations** - Open/Save `.numlang` files (Ctrl+O / Ctrl+S)
-- ✅ **Auto-indentation** - Smart indentation for control structures
-- ✅ **Line Numbers** - Easy navigation and error tracking
-- ✅ **Modern Dark UI** - Responsive design, visual feedback
+- ✅ **Web-Based Editor** - Canvas-based with smooth rendering
+- ✅ **Syntax Highlighting** - Keywords, numbers, functions, operators, constants
+- ✅ **Live Execution** - Instant code execution from browser
+- ✅ **File Management** - Open/Save `.numlang` files (Ctrl+O / Ctrl+S)
+- ✅ **Auto-Indentation** - Smart indentation for all block structures
+- ✅ **Line Numbers** - Navigation and error tracking
+- ✅ **Error Display** - Visual line error indicators
+- ✅ **Dark Theme** - Modern UI with responsive design
 
-### Debugging & REPL
-- ✅ **Interactive REPL** - Execute code line-by-line with state persistence
-- ✅ **Debug Mode** - Toggle debugging with `debug on/off`
-- ✅ **Variable Inspection** - `vars` command to inspect all variables/functions
-- ✅ **Error Stack Traces** - Detailed error information in debug mode
-- ✅ **Command Help** - `help` command in REPL for language reference
+### Command-Line Features
+- ✅ **Interactive REPL** - Full featured interpreter with state persistence
+- ✅ **Debug Mode** - `debug on/off` for detailed execution info
+- ✅ **Variable Inspection** - `vars` command shows all variables and functions
+- ✅ **Error Traces** - Extended error information
+- ✅ **Help System** - `help` command for language reference
+- ✅ **State Management** - `clear` command to reset environment
 
 ---
 
-## 📝 Project Structure
+## 📝 What You Can Build
+
+✅ **Scientific Calculations** - Complex mathematical computations with 50+ functions  
+✅ **Data Analysis** - Statistics, aggregations, list processing  
+✅ **File Processing** - Read/parse/write data files  
+✅ **Algorithms** - Iterative and recursive problem solving  
+✅ **Games** - Turn-based logic with random numbers  
+✅ **Simulations** - Mathematical models and statistics
+
+---
+
+## 📦 Project Structure
 
 ```
 NumLang/
-├── numlang.py           # Core language interpreter
-├── server.py            # Flask backend server
-├── editor.html          # Web-based IDE
-├── example.numlang      # Example program
-├── start-editor.bat     # Quick start script (Windows)
-├── start-editor.ps1     # Quick start script (PowerShell)
-└── fonts/               # IDE font files
+├── numlang.py              # Complete language interpreter
+├── server.py               # Flask web server
+├── launcher.py             # Application launcher
+├── editor.html             # Web-based IDE
+├── example.numlang         # Comprehensive examples
+├── test_advanced.py        # Feature test suite
+├── run-ide.bat             # Windows launcher (easiest!)
+├── start-editor.bat        # Alternative launcher
+├── start-editor.ps1        # PowerShell launcher
+├── DISTRIBUTION.md         # Distribution guide
+└── fonts/                  # IDE font files
 ```
 
 ---
