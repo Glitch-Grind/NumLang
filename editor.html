@@ -167,6 +167,12 @@ pre.success {
 
 canvas {
     display: block;
+    outline: none;
+    cursor: text;
+}
+
+canvas:focus {
+    outline: none;
 }
 
 /* Responsive */
@@ -194,7 +200,7 @@ canvas {
     </div>
 </div>
 
-<canvas id="editor"></canvas>
+<canvas id="editor" tabindex="0"></canvas>
 
 <script>
 const canvas = document.getElementById("editor");
@@ -208,6 +214,16 @@ function resizeCanvas() {
 
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
+
+// Focus canvas on click and on page load
+canvas.addEventListener("click", () => {
+    canvas.focus();
+});
+
+// Focus canvas when page loads
+window.addEventListener("load", () => {
+    canvas.focus();
+});
 
 let lines = [""];
 let cursorX = 0;
@@ -272,6 +288,16 @@ setInterval(() => {
 }, 500);
 
 document.addEventListener("keydown", e => {
+    // Ignore keyboard events if user is typing in an input field
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) {
+        return;
+    }
+    
+    // Focus canvas if it's not focused
+    if (document.activeElement !== canvas) {
+        canvas.focus();
+    }
+    
     const line = lines[cursorY];
 
     if (e.key === "Backspace") {
