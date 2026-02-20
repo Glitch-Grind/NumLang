@@ -453,12 +453,20 @@ function resizeCanvas() {
 }
 
 function getThemeColor(cssVar) {
+    // Prefer CSS variables defined on <body> (body.light-theme),
+    // fall back to :root if not present.
+    const body = document.body;
     const root = document.documentElement;
+    let val = "";
+    if (body) {
+        val = getComputedStyle(body).getPropertyValue(cssVar).trim();
+        if (val) return val;
+    }
     return getComputedStyle(root).getPropertyValue(cssVar).trim();
 }
 
 function draw() {
-    const bgColor = getThemeColor('--bg-primary');
+    const bgColor = getThemeColor('--canvas-bg');
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
