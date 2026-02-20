@@ -1,20 +1,66 @@
-# NumLang Example Program
-# Calculate factorial of a number
+# NumLang v1.2 - Comprehensive Example Program
 
-let n = 5
-let fact = 1
+# VARIABLES & BASIC MATH
+let x = 10
+let y = 20
+let sum = x + y
+print sum
 
-for i = 1 to n do
-    let fact = fact * i
+# LISTS
+let numbers = [1, 2, 3, 4, 5]
+print numbers
+print len(numbers)
+
+# STRINGS
+let greeting = "Hello, NumLang!"
+print greeting
+print upper(greeting)
+print lower(greeting)
+
+# STRING CONCATENATION
+let name = "World"
+let message = "Hello, " . name . "!"
+print message
+
+# LOOPS
+for i = 1 to 5 do
+    print i
 end
 
-print fact
+# CONDITIONALS
+let score = 85
+if score >= 90 then
+    print "Grade: A"
+end
+if score >= 80 then
+    print "Grade: B"
+end
 
-# Use a custom function
+# USER-DEFINED FUNCTIONS
 function square(x) = x * x
-print square(5)
+function distance(x1, y1, x2, y2) = sqrt((x2 - x1)^2 + (y2 - y1)^2)
 
-# Conditional example
-if fact > 100 then
-    print "Large factorial!"
+print square(5)
+print distance(0, 0, 3, 4)
+
+# FACTORIAL WITH LOOPS
+let n = 5
+let factorial = 1
+for i = 1 to n do
+    let factorial = factorial * i
 end
+print factorial
+
+# MATHEMATICAL FUNCTIONS
+let angle = pi / 4
+print sin(angle)
+print cos(angle)
+print deg(angle)
+
+# LIST OPERATIONS
+let list = [10, 20, 30]
+let last = pop(list)
+print last
+print list
+append(list, 40)
+print list
