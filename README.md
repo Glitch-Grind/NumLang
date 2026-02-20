@@ -284,23 +284,32 @@ append_file("numbers.txt", "\n6,7,8,9,10")
 - Python 3.x
 - Flask (`pip install flask flask-cors`)
 
-### Quick Start (Easiest Way)
+### Quick Start (Recommended - Windows)
+
+**Just double-click `run-ide.bat`**
+- The launcher automatically:
+  - Installs Python dependencies if needed
+  - Starts the server
+  - Opens the IDE in your browser
+  - No additional setup required!
+
+### Alternative: PowerShell Script
 
 **Windows Users:**
-- **Double-click** `start-editor.bat` (or `start-editor.ps1` for PowerShell)
-- The server will start automatically and the editor will open in your browser!
+- **Double-click** `start-editor.ps1`
+- Or run: `.\start-editor.ps1`
 
 ### Manual Setup
 
 1. **Start the server:**
    ```bash
-   python server.py
+   python launcher.py
    ```
-   The server will run on `http://localhost:5000`
+   The server will run on `http://localhost:5000` and open in your browser automatically.
 
-2. **Open the IDE:**
+2. **Or open the HTML file directly** (requires manual server start):
    - Open `editor.html` in your web browser
-   - Or double-click `start-editor.bat` / `start-editor.ps1`
+   - Make sure `server.py` is running for full functionality
 
 3. **Write and run code:**
    - Type your NumLang code in the editor
@@ -397,7 +406,17 @@ NumLang/
 
 ---
 
-## 📖 Version History
+## � Distribution & Standalone Options
+
+See [DISTRIBUTION.md](DISTRIBUTION.md) for detailed instructions on:
+- Running with `run-ide.bat` (Windows, easiest)
+- Building a standalone `.exe` executable
+- Running the REPL interpreter
+- Different deployment options
+
+---
+
+## �📖 Version History
 
 **v1.2** - Major expansion with arrays, strings, file I/O, debugging, and REPL
 - Added list/array support with operations
