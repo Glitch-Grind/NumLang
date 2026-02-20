@@ -206,25 +206,6 @@ canvas:focus {
 const canvas = document.getElementById("editor");
 const ctx = canvas.getContext("2d");
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    draw();
-}
-
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-// Focus canvas on click and on page load
-canvas.addEventListener("click", () => {
-    canvas.focus();
-});
-
-// Focus canvas when page loads
-window.addEventListener("load", () => {
-    canvas.focus();
-});
-
 let lines = [""];
 let cursorX = 0;
 let cursorY = 0;
@@ -234,18 +215,29 @@ const fontSize = 16;
 const lineHeight = 24;
 const padding = 60;
 
-ctx.font = fontSize + "px JetBrainsMono, Consolas, monospace";
+function setFont() {
+    ctx.font = fontSize + "px JetBrainsMono, Consolas, monospace";
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+}
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    setFont(); // Reset font after canvas resize (context is reset)
+    draw();
+}
 
 function draw() {
     ctx.fillStyle = "#0f111a";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     lines.forEach((line, i) => {
-        const y = (i + 1) * lineHeight;
+        const y = i * lineHeight + 4; // Top baseline, add small padding
 
         // Line numbers
         ctx.fillStyle = "#3b4261";
-        ctx.fillText(i + 1, 20, y);
+        ctx.fillText((i + 1).toString(), 20, y);
 
         drawHighlightedText(line, padding, y);
     });
@@ -275,10 +267,10 @@ function getTokenColor(token) {
 function drawCaret() {
     const textBeforeCursor = lines[cursorY].slice(0, cursorX);
     const x = padding + ctx.measureText(textBeforeCursor).width;
-    const y = cursorY * lineHeight + 8;
+    const y = cursorY * lineHeight + 4; // Match text y position
 
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(x, y, 2, lineHeight - 10);
+    ctx.fillRect(x, y, 2, fontSize);
 }
 
 /* Blinking caret */
@@ -400,6 +392,21 @@ function runCode() {
         runButton.textContent = "▶ Run";
     });
 }
+
+// Initialize canvas and event listeners
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+// Focus canvas on click and on page load
+canvas.addEventListener("click", () => {
+    canvas.focus();
+});
+
+// Focus canvas when page loads
+window.addEventListener("load", () => {
+    canvas.focus();
+    draw(); // Ensure initial draw
+});
 </script>
 
 </body>
