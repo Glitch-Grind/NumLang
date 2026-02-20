@@ -2,6 +2,8 @@
 
 A powerful programming language designed for mathematical computations with a **canvas-based IDE** featuring syntax highlighting, control flow, and live execution.
 
+**File Extension:** `.numlang` or `.nl`
+
 ---
 
 ## 📋 About
@@ -178,6 +180,7 @@ print d
 ## ✨ IDE Features
 
 - **Canvas-based code editor** – Custom-built editor with smooth text rendering
+- **File operations** – Open and save `.numlang` files (Ctrl+O / Ctrl+S)
 - **Advanced syntax highlighting** – Color-coded keywords, numbers, functions, operators, and constants
 - **Live execution** – Run NumLang scripts directly from the browser with a single click
 - **Error highlighting** – Visual indication of lines with errors
@@ -185,6 +188,7 @@ print d
 - **Line numbers** – Easy navigation and error tracking
 - **Modern UI** – Dark theme with polished interface and visual feedback
 - **Output panel** – See results in real-time with success/error indicators
+- **Keyboard shortcuts** – Ctrl+S to save, Ctrl+O to open files
 - **Responsive design** – Works on different screen sizes
 
 ---

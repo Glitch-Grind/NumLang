@@ -1,0 +1,20 @@
+# NumLang Example Program
+# Calculate factorial of a number
+
+let n = 5
+let fact = 1
+
+for i = 1 to n do
+    let fact = fact * i
+end
+
+print fact
+
+# Use a custom function
+function square(x) = x * x
+print square(5)
+
+# Conditional example
+if fact > 100 then
+    print "Large factorial!"
+end

@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>NumLang Editor</title>
+<!-- React and ReactDOM -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel Standalone for JSX -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <style>
 @font-face {
@@ -14,11 +19,50 @@
     box-sizing: border-box;
 }
 
+:root {
+    /* Dark theme (default) */
+    --bg-primary: #0f111a;
+    --bg-secondary: #1a1b26;
+    --bg-tertiary: rgba(26, 27, 38, 0.8);
+    --text-primary: #c0caf5;
+    --text-secondary: #3b4261;
+    --text-tertiary: #d4d4d4;
+    --accent: #7aa2f7;
+    --accent-hover: #89b4fa;
+    --accent-light: #a5c9ff;
+    --button-text: #0f111a;
+    --border: rgba(192, 202, 245, 0.1);
+    --success: #9ece6a;
+    --error: #f7768e;
+    --line-number: #3b4261;
+    --caret: #ffffff;
+}
+
+body.light-theme {
+    /* Light theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: rgba(245, 245, 245, 0.8);
+    --text-primary: #2d3748;
+    --text-secondary: #a0aec0;
+    --text-tertiary: #4a5568;
+    --accent: #4299e1;
+    --accent-hover: #3182ce;
+    --accent-light: #63b3ed;
+    --button-text: #ffffff;
+    --border: rgba(45, 55, 72, 0.1);
+    --success: #48bb78;
+    --error: #f56565;
+    --line-number: #a0aec0;
+    --caret: #2d3748;
+}
+
 body {
     margin: 0;
-    background: #0f111a;
+    background: var(--bg-primary);
     overflow: hidden;
     font-family: "JetBrainsMono", Consolas, monospace;
+    transition: background-color 0.3s ease;
 }
 
 /* UI Panel */
@@ -37,18 +81,36 @@ body {
     margin-bottom: 12px;
 }
 
+#file-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+#file-buttons button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+#file-input {
+    display: none;
+}
+
 #ui-title {
-    color: #c0caf5;
+    color: var(--text-primary);
     font-size: 16px;
     font-weight: 600;
     margin: 0;
     flex: 1;
+    transition: color 0.3s ease;
 }
 
 button {
-    background: linear-gradient(135deg, #7aa2f7 0%, #89b4fa 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
     border: none;
-    color: #0f111a;
+    color: var(--button-text);
+    transition: all 0.3s ease;
     padding: 10px 20px;
     font-family: "JetBrainsMono", Consolas, monospace;
     cursor: pointer;
@@ -62,9 +124,24 @@ button {
 }
 
 button:hover {
-    background: linear-gradient(135deg, #89b4fa 0%, #a5c9ff 100%);
+    background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-light) 100%);
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(122, 162, 247, 0.4);
+}
+
+#theme-toggle {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    font-size: 18px;
+    min-width: 44px;
+    transition: all 0.3s ease;
+}
+
+#theme-toggle:hover {
+    background: var(--bg-tertiary);
+    transform: rotate(180deg);
 }
 
 button:active {
@@ -97,40 +174,44 @@ button.running::after {
 }
 
 #output-container {
-    background: #1a1b26;
+    background: var(--bg-secondary);
     border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    border: 1px solid rgba(192, 202, 245, 0.1);
+    border: 1px solid var(--border);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 #output-header {
-    background: rgba(26, 27, 38, 0.8);
+    background: var(--bg-tertiary);
     padding: 10px 16px;
-    border-bottom: 1px solid rgba(192, 202, 245, 0.1);
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 #output-header::before {
     content: '▶';
-    color: #7aa2f7;
+    color: var(--accent);
     font-size: 10px;
+    transition: color 0.3s ease;
 }
 
 #output-label {
-    color: #c0caf5;
+    color: var(--text-primary);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 pre {
-    background: #1a1b26;
-    color: #c0caf5;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     padding: 16px;
     margin: 0;
     height: 240px;
@@ -138,6 +219,7 @@ pre {
     font-size: 13px;
     line-height: 1.6;
     font-family: "JetBrainsMono", Consolas, monospace;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 pre::-webkit-scrollbar {
@@ -145,24 +227,24 @@ pre::-webkit-scrollbar {
 }
 
 pre::-webkit-scrollbar-track {
-    background: rgba(26, 27, 38, 0.5);
+    background: var(--bg-tertiary);
 }
 
 pre::-webkit-scrollbar-thumb {
-    background: rgba(192, 202, 245, 0.2);
+    background: var(--border);
     border-radius: 4px;
 }
 
 pre::-webkit-scrollbar-thumb:hover {
-    background: rgba(192, 202, 245, 0.3);
+    background: var(--text-secondary);
 }
 
 pre.error {
-    color: #f7768e;
+    color: var(--error);
 }
 
 pre.success {
-    color: #9ece6a;
+    color: var(--success);
 }
 
 canvas {
@@ -173,6 +255,133 @@ canvas {
 
 canvas:focus {
     outline: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes successFlash {
+    0% { background-color: rgba(158, 206, 106, 0.3); }
+    100% { background-color: transparent; }
+}
+
+@keyframes errorFlash {
+    0% { background-color: rgba(247, 118, 142, 0.3); }
+    100% { background-color: transparent; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.4s ease-out;
+}
+
+.pulse {
+    animation: pulse 0.5s ease-in-out;
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.success-flash {
+    animation: successFlash 0.5s ease-out;
+}
+
+.error-flash {
+    animation: errorFlash 0.5s ease-out;
+}
+
+/* React component styles */
+.react-ui {
+    animation: fadeIn 0.5s ease-out;
+}
+
+button {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+#output-container {
+    transition: all 0.3s ease;
+}
+
+#output-container pre {
+    transition: all 0.3s ease;
+}
+
+/* Smooth transitions for React state changes */
+#ui {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#file-buttons button {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#file-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(122, 162, 247, 0.4);
 }
 
 /* Responsive */
@@ -187,18 +396,8 @@ canvas:focus {
 
 <body>
 
-<div id="ui">
-    <div id="ui-header">
-        <h3 id="ui-title">NumLang Editor</h3>
-        <button id="run-button" onclick="runCode()">▶ Run</button>
-    </div>
-    <div id="output-container">
-        <div id="output-header">
-            <span id="output-label">Output</span>
-        </div>
-        <pre id="output">Ready. Click Run to execute your code.</pre>
-    </div>
-</div>
+<div id="react-root"></div>
+<input type="file" id="file-input" accept=".numlang,.nl" style="display: none;" />
 
 <canvas id="editor" tabindex="0"></canvas>
 
@@ -212,6 +411,7 @@ let cursorY = 0;
 let showCaret = true;
 let errorLines = new Set(); // Track lines with errors
 let indentLevel = 0; // Track indentation level
+let currentFileName = null; // Track current file name
 
 const fontSize = 16;
 const lineHeight = 24;
@@ -230,21 +430,31 @@ function resizeCanvas() {
     draw();
 }
 
+function getThemeColor(cssVar) {
+    const root = document.documentElement;
+    return getComputedStyle(root).getPropertyValue(cssVar).trim();
+}
+
 function draw() {
-    ctx.fillStyle = "#0f111a";
+    const bgColor = getThemeColor('--bg-primary');
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const errorColor = getThemeColor('--error');
+    const lineNumberColor = getThemeColor('--line-number');
+    const errorBgColor = errorColor + "33"; // Add transparency
 
     lines.forEach((line, i) => {
         const y = i * lineHeight + 4; // Top baseline, add small padding
 
         // Highlight error lines
         if (errorLines.has(i + 1)) {
-            ctx.fillStyle = "rgba(247, 118, 142, 0.2)";
+            ctx.fillStyle = errorBgColor;
             ctx.fillRect(0, y - 2, canvas.width, lineHeight);
         }
 
         // Line numbers
-        ctx.fillStyle = errorLines.has(i + 1) ? "#f7768e" : "#3b4261";
+        ctx.fillStyle = errorLines.has(i + 1) ? errorColor : lineNumberColor;
         ctx.fillText((i + 1).toString(), 20, y);
 
         drawHighlightedText(line, padding, y);
@@ -311,25 +521,27 @@ function drawHighlightedText(text, x, y) {
 }
 
 function getTokenColor(token) {
+    const isLight = document.body.classList.contains('light-theme');
+    
     // Numbers
-    if (/^\d+(\.\d+)?$/.test(token)) return "#89ddff";
+    if (/^\d+(\.\d+)?$/.test(token)) return isLight ? "#2563eb" : "#89ddff";
     
     // Keywords
-    if (/^(let|print|if|then|for|do|end|function)$/.test(token)) return "#c792ea";
+    if (/^(let|print|if|then|for|do|end|function)$/.test(token)) return isLight ? "#9333ea" : "#c792ea";
     
     // Math functions
-    if (/^(sqrt|abs|floor|ceil|round|exp|pow|sin|cos|tan|asin|acos|atan|deg|rad|log|log10|log2)$/.test(token)) return "#82aaff";
+    if (/^(sqrt|abs|floor|ceil|round|exp|pow|sin|cos|tan|asin|acos|atan|deg|rad|log|log10|log2)$/.test(token)) return isLight ? "#3b82f6" : "#82aaff";
     
     // Constants
-    if (/^(pi|e|tau|inf|nan)$/.test(token)) return "#7dcfff";
+    if (/^(pi|e|tau|inf|nan)$/.test(token)) return isLight ? "#0284c7" : "#7dcfff";
     
     // Operators
-    if (/^[=+\-*/^()%]+$/.test(token)) return "#ffcb6b";
+    if (/^[=+\-*/^()%]+$/.test(token)) return isLight ? "#ea580c" : "#ffcb6b";
     
     // Comparison operators
-    if (/^(>=|<=|==|!=|>|<)$/.test(token)) return "#ff9e64";
+    if (/^(>=|<=|==|!=|>|<)$/.test(token)) return isLight ? "#dc2626" : "#ff9e64";
     
-    return "#d4d4d4";
+    return getThemeColor('--text-tertiary');
 }
 
 function drawCaret() {
@@ -337,7 +549,8 @@ function drawCaret() {
     const x = padding + ctx.measureText(textBeforeCursor).width;
     const y = cursorY * lineHeight + 4; // Match text y position
 
-    ctx.fillStyle = "#ffffff";
+    const caretColor = getThemeColor('--caret');
+    ctx.fillStyle = caretColor;
     ctx.fillRect(x, y, 2, fontSize);
 }
 
@@ -351,6 +564,20 @@ document.addEventListener("keydown", e => {
     // Ignore keyboard events if user is typing in an input field
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) {
         return;
+    }
+    
+    // Keyboard shortcuts
+    if (e.ctrlKey || e.metaKey) {
+        if (e.key === "s") {
+            e.preventDefault();
+            saveFile();
+            return;
+        }
+        if (e.key === "o") {
+            e.preventDefault();
+            openFile();
+            return;
+        }
     }
     
     // Focus canvas if it's not focused
@@ -451,15 +678,10 @@ document.addEventListener("keydown", e => {
 /* Run Button Logic */
 function runCode() {
     const code = lines.join("\n");
-    const runButton = document.getElementById("run-button");
-    const output = document.getElementById("output");
     
-    // Disable button and show loading state
-    runButton.disabled = true;
-    runButton.classList.add("running");
-    runButton.textContent = "Running";
-    output.textContent = "Running code...";
-    output.className = "";
+    // Update React state
+    if (window.setRunning) window.setRunning(true);
+    if (window.updateOutput) window.updateOutput("Running code...", "", false);
     
     fetch("http://localhost:5000/run", {
         method: "POST",
@@ -479,32 +701,251 @@ function runCode() {
             errorLines.add(lineNum);
         }
         
-        output.textContent = result;
-        
         // Check if there are errors
-        if (errorLines.size > 0 || result.toLowerCase().includes("error")) {
-            output.className = "error";
-        } else {
-            output.className = "success";
-        }
+        const hasErrors = errorLines.size > 0 || result.toLowerCase().includes("error");
+        const className = hasErrors ? "error" : "success";
+        
+        // Update React state with animation
+        if (window.updateOutput) window.updateOutput(result, className, true);
         
         // Redraw to show error highlighting
         draw();
     })
     .catch(err => {
         errorLines.clear();
-        output.textContent = "Error connecting to server: " + err;
-        output.className = "error";
+        const errorMsg = "Error connecting to server: " + err;
+        if (window.updateOutput) window.updateOutput(errorMsg, "error", true);
         draw();
     })
     .finally(() => {
         // Re-enable button
-        runButton.disabled = false;
-        runButton.classList.remove("running");
-        runButton.textContent = "▶ Run";
+        if (window.setRunning) window.setRunning(false);
     });
 }
 
+// File operations
+function openFile() {
+    const fileInput = document.getElementById("file-input");
+    fileInput.click();
+    
+    fileInput.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            // Split content into lines
+            lines = content.split("\n");
+            if (lines.length === 0) lines = [""];
+            
+            // Store filename
+            currentFileName = file.name;
+            
+            // Reset cursor
+            cursorY = 0;
+            cursorX = 0;
+            
+            // Clear errors
+            errorLines.clear();
+            
+            // Redraw editor
+            draw();
+            
+            // Update React state
+            if (window.setFileStatus) window.setFileStatus(`✓ Opened: ${file.name}`);
+            if (window.updateOutput) window.updateOutput(`Opened: ${file.name}`, "success", true);
+        };
+        reader.readAsText(file);
+        
+        // Reset file input
+        fileInput.value = "";
+    }, { once: true });
+}
+
+function saveFile() {
+    const code = lines.join("\n");
+    
+    if (!code.trim()) {
+        if (window.updateOutput) window.updateOutput("Nothing to save - editor is empty", "error", true);
+        return;
+    }
+    
+    // Use current filename if available, otherwise default to script.numlang
+    let fileName = currentFileName || "script.numlang";
+    
+    // Ensure .numlang extension
+    if (!fileName.endsWith(".numlang") && !fileName.endsWith(".nl")) {
+        fileName = fileName.replace(/\.[^/.]+$/, "") + ".numlang";
+    }
+    
+    // Create blob with .numlang extension
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+    
+    // Update React state
+    if (window.setFileStatus) window.setFileStatus(`✓ Saved: ${fileName}`);
+    if (window.updateOutput) window.updateOutput(`File saved as ${fileName}`, "success", true);
+}
+
+</script>
+
+<script type="text/babel">
+// React Components
+const { useState, useEffect, useRef } = React;
+
+function UIComponent() {
+    // Load theme from localStorage or default to dark
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const saved = localStorage.getItem('numlang-theme');
+        return saved !== 'light';
+    });
+    const [output, setOutput] = useState("Ready. Click Run to execute your code.");
+    const [outputClass, setOutputClass] = useState("");
+    const [isRunning, setIsRunning] = useState(false);
+    const [fileStatus, setFileStatus] = useState("");
+    const [animationClass, setAnimationClass] = useState("");
+    const outputRef = useRef(null);
+
+    // Apply theme on mount and when it changes
+    useEffect(() => {
+        if (isDarkMode) {
+            document.body.classList.remove('light-theme');
+        } else {
+            document.body.classList.add('light-theme');
+        }
+        localStorage.setItem('numlang-theme', isDarkMode ? 'dark' : 'light');
+        
+        // Redraw canvas with new theme colors
+        if (typeof draw === 'function') {
+            draw();
+        }
+    }, [isDarkMode]);
+
+    useEffect(() => {
+        // Expose functions to global scope for canvas editor
+        window.updateOutput = (text, className, animate = false) => {
+            setOutput(text);
+            setOutputClass(className);
+            if (animate) {
+                if (className === "success") {
+                    setAnimationClass("success-flash");
+                } else if (className === "error") {
+                    setAnimationClass("error-flash");
+                }
+                setTimeout(() => setAnimationClass(""), 500);
+            }
+        };
+
+        window.setRunning = (running) => {
+            setIsRunning(running);
+        };
+
+        window.setFileStatus = (status) => {
+            setFileStatus(status);
+            setTimeout(() => setFileStatus(""), 3000);
+        };
+    }, []);
+
+    const handleRun = () => {
+        setIsRunning(true);
+        setAnimationClass("pulse");
+        setTimeout(() => setAnimationClass(""), 500);
+        runCode();
+    };
+
+    const handleOpen = () => {
+        setAnimationClass("slide-in");
+        setTimeout(() => setAnimationClass(""), 400);
+        openFile();
+    };
+
+    const handleSave = () => {
+        setAnimationClass("pulse");
+        setTimeout(() => setAnimationClass(""), 500);
+        saveFile();
+    };
+
+    const toggleTheme = () => {
+        setIsDarkMode(!isDarkMode);
+        setAnimationClass("pulse");
+        setTimeout(() => setAnimationClass(""), 500);
+    };
+
+    return (
+        <div id="ui" className={`react-ui ${animationClass}`}>
+            <div id="ui-header" className="fade-in">
+                <h3 id="ui-title">NumLang Editor</h3>
+                <button 
+                    id="theme-toggle"
+                    onClick={toggleTheme}
+                    title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                >
+                    {isDarkMode ? "🌙" : "☀️"}
+                </button>
+                <button 
+                    id="run-button" 
+                    onClick={handleRun}
+                    disabled={isRunning}
+                    className={isRunning ? "running" : ""}
+                >
+                    {isRunning ? "⏳ Running" : "▶ Run"}
+                </button>
+            </div>
+            <div id="file-buttons" className="slide-in">
+                <button onClick={handleOpen}>📂 Open</button>
+                <button onClick={handleSave}>💾 Save</button>
+            </div>
+            {fileStatus && (
+                <div style={{
+                    padding: "8px",
+                    marginBottom: "12px",
+                    background: "var(--bg-tertiary)",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border)",
+                    animation: "fadeIn 0.3s ease-out"
+                }}>
+                    {fileStatus}
+                </div>
+            )}
+            <div id="output-container" className={`${animationClass}`}>
+                <div id="output-header">
+                    <span id="output-label">Output</span>
+                </div>
+                <pre 
+                    id="output" 
+                    ref={outputRef}
+                    className={outputClass}
+                    style={{
+                        animation: outputClass ? (outputClass === "success" ? "successFlash 0.5s" : "errorFlash 0.5s") : ""
+                    }}
+                >
+                    {output}
+                </pre>
+            </div>
+        </div>
+    );
+}
+
+// Render React component
+const root = ReactDOM.createRoot(document.getElementById('react-root'));
+root.render(<UIComponent />);
+</script>
+
+<script>
 // Initialize canvas and event listeners
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
@@ -518,6 +959,23 @@ canvas.addEventListener("click", () => {
 window.addEventListener("load", () => {
     canvas.focus();
     draw(); // Ensure initial draw
+});
+
+// Expose redraw function for theme changes
+window.redrawCanvas = () => {
+    draw();
+};
+
+// Listen for theme changes and redraw
+const observer = new MutationObserver(() => {
+    if (typeof draw === 'function') {
+        draw();
+    }
+});
+
+observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class']
 });
 </script>
 
