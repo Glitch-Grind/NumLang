@@ -95,7 +95,13 @@ print cos(angle)
 - Python 3.x
 - Flask (`pip install flask flask-cors`)
 
-### Running the IDE
+### Quick Start (Easiest Way)
+
+**Windows Users:**
+- **Double-click** `start-editor.bat` (or `start-editor.ps1` for PowerShell)
+- The server will start automatically and the editor will open in your browser!
+
+### Manual Setup
 
 1. **Start the server:**
    ```bash
@@ -105,7 +111,7 @@ print cos(angle)
 
 2. **Open the IDE:**
    - Open `editor.html` in your web browser
-   - Or serve it through a local web server
+   - Or double-click `start-editor.bat` / `start-editor.ps1`
 
 3. **Write and run code:**
    - Type your NumLang code in the editor
