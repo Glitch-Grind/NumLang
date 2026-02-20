@@ -210,8 +210,8 @@ function runCode() {
 
     fetch("http://localhost:5000/run", {
         method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: code
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code })
     })
     .then(res => res.text())
     .then(result => {
