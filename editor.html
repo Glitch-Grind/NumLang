@@ -36,6 +36,17 @@
     --error: #f7768e;
     --line-number: #3b4261;
     --caret: #ffffff;
+
+    /* Canvas-specific colors (dark theme defaults) */
+    --canvas-bg: #0f111a;
+    --canvas-text: #c0caf5;
+    --canvas-line-number: #3b4261;
+    --canvas-number: #89ddff;
+    --canvas-keyword: #c792ea;
+    --canvas-fn: #82aaff;
+    --canvas-const: #7dcfff;
+    --canvas-operator: #ffcb6b;
+    --canvas-compare: #ff9e64;
 }
 
 body.light-theme {
@@ -55,6 +66,17 @@ body.light-theme {
     --error: #f56565;
     --line-number: #a0aec0;
     --caret: #2d3748;
+
+    /* Canvas-specific colors for light theme */
+    --canvas-bg: #ffffff;
+    --canvas-text: #1f2937; /* darker than --text-primary for readability */
+    --canvas-line-number: #6b7280; /* medium gray for line numbers */
+    --canvas-number: #1d4ed8;
+    --canvas-keyword: #7c3aed;
+    --canvas-fn: #1e40af;
+    --canvas-const: #0369a1;
+    --canvas-operator: #b45309;
+    --canvas-compare: #dc2626;
 }
 
 body {
@@ -441,7 +463,7 @@ function draw() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const errorColor = getThemeColor('--error');
-    const lineNumberColor = getThemeColor('--line-number');
+    const lineNumberColor = getThemeColor('--canvas-line-number');
     const errorBgColor = errorColor + "33"; // Add transparency
 
     lines.forEach((line, i) => {
@@ -521,27 +543,26 @@ function drawHighlightedText(text, x, y) {
 }
 
 function getTokenColor(token) {
-    const isLight = document.body.classList.contains('light-theme');
-    
+    // Prefer explicit canvas vars so theme toggles affect canvas correctly
     // Numbers
-    if (/^\d+(\.\d+)?$/.test(token)) return isLight ? "#2563eb" : "#89ddff";
-    
+    if (/^\d+(\.\d+)?$/.test(token)) return getThemeColor('--canvas-number');
+
     // Keywords
-    if (/^(let|print|if|then|for|do|end|function)$/.test(token)) return isLight ? "#9333ea" : "#c792ea";
-    
+    if (/^(let|print|if|then|for|do|end|function)$/.test(token)) return getThemeColor('--canvas-keyword');
+
     // Math functions
-    if (/^(sqrt|abs|floor|ceil|round|exp|pow|sin|cos|tan|asin|acos|atan|deg|rad|log|log10|log2)$/.test(token)) return isLight ? "#3b82f6" : "#82aaff";
-    
+    if (/^(sqrt|abs|floor|ceil|round|exp|pow|sin|cos|tan|asin|acos|atan|deg|rad|log|log10|log2)$/.test(token)) return getThemeColor('--canvas-fn');
+
     // Constants
-    if (/^(pi|e|tau|inf|nan)$/.test(token)) return isLight ? "#0284c7" : "#7dcfff";
-    
+    if (/^(pi|e|tau|inf|nan)$/.test(token)) return getThemeColor('--canvas-const');
+
     // Operators
-    if (/^[=+\-*/^()%]+$/.test(token)) return isLight ? "#ea580c" : "#ffcb6b";
-    
+    if (/^[=+\-*/^()%]+$/.test(token)) return getThemeColor('--canvas-operator');
+
     // Comparison operators
-    if (/^(>=|<=|==|!=|>|<)$/.test(token)) return isLight ? "#dc2626" : "#ff9e64";
-    
-    return getThemeColor('--text-tertiary');
+    if (/^(>=|<=|==|!=|>|<)$/.test(token)) return getThemeColor('--canvas-compare');
+
+    return getThemeColor('--canvas-text');
 }
 
 function drawCaret() {
