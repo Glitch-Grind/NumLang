@@ -210,6 +210,8 @@ let lines = [""];
 let cursorX = 0;
 let cursorY = 0;
 let showCaret = true;
+let errorLines = new Set(); // Track lines with errors
+let indentLevel = 0; // Track indentation level
 
 const fontSize = 16;
 const lineHeight = 24;
@@ -235,8 +237,14 @@ function draw() {
     lines.forEach((line, i) => {
         const y = i * lineHeight + 4; // Top baseline, add small padding
 
+        // Highlight error lines
+        if (errorLines.has(i + 1)) {
+            ctx.fillStyle = "rgba(247, 118, 142, 0.2)";
+            ctx.fillRect(0, y - 2, canvas.width, lineHeight);
+        }
+
         // Line numbers
-        ctx.fillStyle = "#3b4261";
+        ctx.fillStyle = errorLines.has(i + 1) ? "#f7768e" : "#3b4261";
         ctx.fillText((i + 1).toString(), 20, y);
 
         drawHighlightedText(line, padding, y);
@@ -246,21 +254,81 @@ function draw() {
 }
 
 function drawHighlightedText(text, x, y) {
-    const tokens = text.split(/(\s+)/);
+    // Improved tokenization to handle operators and keywords better
+    const tokens = [];
+    let currentToken = "";
+    let i = 0;
+    
+    while (i < text.length) {
+        const char = text[i];
+        const nextChar = i + 1 < text.length ? text[i + 1] : "";
+        
+        // Handle multi-character operators
+        if ((char === '>' && nextChar === '=') || 
+            (char === '<' && nextChar === '=') ||
+            (char === '=' && nextChar === '=') ||
+            (char === '!' && nextChar === '=')) {
+            if (currentToken) {
+                tokens.push(currentToken);
+                currentToken = "";
+            }
+            tokens.push(char + nextChar);
+            i += 2;
+            continue;
+        }
+        
+        // Handle single-character operators and separators
+        if (/[\s+\-*/^()%=<>!]/.test(char)) {
+            if (currentToken) {
+                tokens.push(currentToken);
+                currentToken = "";
+            }
+            if (!/\s/.test(char)) {
+                tokens.push(char);
+            } else {
+                tokens.push(" "); // Preserve spaces
+            }
+            i++;
+            continue;
+        }
+        
+        currentToken += char;
+        i++;
+    }
+    
+    if (currentToken) {
+        tokens.push(currentToken);
+    }
+    
     let offsetX = x;
-
     tokens.forEach(token => {
-        ctx.fillStyle = getTokenColor(token);
-        ctx.fillText(token, offsetX, y);
-        offsetX += ctx.measureText(token).width;
+        if (token.trim() || token === " ") {
+            ctx.fillStyle = getTokenColor(token);
+            ctx.fillText(token, offsetX, y);
+            offsetX += ctx.measureText(token).width;
+        }
     });
 }
 
 function getTokenColor(token) {
+    // Numbers
     if (/^\d+(\.\d+)?$/.test(token)) return "#89ddff";
-    if (/^(let|print)$/.test(token)) return "#c792ea";
-    if (/^(sqrt|sin|cos|tan|log)$/.test(token)) return "#82aaff";
-    if (/^[=+\-*/^()]+$/.test(token)) return "#ffcb6b";
+    
+    // Keywords
+    if (/^(let|print|if|then|for|do|end|function)$/.test(token)) return "#c792ea";
+    
+    // Math functions
+    if (/^(sqrt|abs|floor|ceil|round|exp|pow|sin|cos|tan|asin|acos|atan|deg|rad|log|log10|log2)$/.test(token)) return "#82aaff";
+    
+    // Constants
+    if (/^(pi|e|tau|inf|nan)$/.test(token)) return "#7dcfff";
+    
+    // Operators
+    if (/^[=+\-*/^()%]+$/.test(token)) return "#ffcb6b";
+    
+    // Comparison operators
+    if (/^(>=|<=|==|!=|>|<)$/.test(token)) return "#ff9e64";
+    
     return "#d4d4d4";
 }
 
@@ -310,10 +378,32 @@ document.addEventListener("keydown", e => {
     else if (e.key === "Enter") {
         const newLine = line.slice(cursorX);
         lines[cursorY] = line.slice(0, cursorX);
-        lines.splice(cursorY + 1, 0, newLine);
-
+        
+        // Auto-indentation
+        const currentLine = lines[cursorY];
+        let indent = 0;
+        
+        // Check for indentation triggers
+        const trimmed = currentLine.trim();
+        if (trimmed.startsWith("if ") || trimmed.startsWith("for ") || trimmed.startsWith("function ")) {
+            indent = 1;
+        } else if (trimmed === "end" || trimmed.startsWith("end ")) {
+            indent = -1;
+        }
+        
+        // Calculate current indentation
+        let currentIndent = 0;
+        for (let i = 0; i < currentLine.length && currentLine[i] === ' '; i++) {
+            currentIndent++;
+        }
+        
+        // Apply new indentation (4 spaces per level)
+        const newIndent = Math.max(0, Math.floor(currentIndent / 4) + indent) * 4;
+        const indentStr = " ".repeat(newIndent);
+        
+        lines.splice(cursorY + 1, 0, indentStr + newLine);
         cursorY++;
-        cursorX = 0;
+        cursorX = newIndent;
     }
 
     else if (e.key === "ArrowLeft") {
@@ -378,12 +468,34 @@ function runCode() {
     })
     .then(res => res.text())
     .then(result => {
+        // Clear previous error lines
+        errorLines.clear();
+        
+        // Parse error messages to find line numbers
+        const errorPattern = /Line (\d+):/g;
+        let match;
+        while ((match = errorPattern.exec(result)) !== null) {
+            const lineNum = parseInt(match[1]);
+            errorLines.add(lineNum);
+        }
+        
         output.textContent = result;
-        output.className = "success";
+        
+        // Check if there are errors
+        if (errorLines.size > 0 || result.toLowerCase().includes("error")) {
+            output.className = "error";
+        } else {
+            output.className = "success";
+        }
+        
+        // Redraw to show error highlighting
+        draw();
     })
     .catch(err => {
+        errorLines.clear();
         output.textContent = "Error connecting to server: " + err;
         output.className = "error";
+        draw();
     })
     .finally(() => {
         // Re-enable button

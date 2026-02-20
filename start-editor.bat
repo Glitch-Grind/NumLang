@@ -28,7 +28,15 @@ timeout /t 3 /nobreak >nul
 REM Open the editor in default browser
 echo Opening editor in browser...
 cd /d %~dp0
-start editor.html
+if exist "%~dp0editor.html" (
+    REM Use rundll32 to open with default browser (most reliable method)
+    rundll32 url.dll,FileProtocolHandler "%~dp0editor.html"
+) else (
+    echo ERROR: editor.html not found!
+    echo Current directory: %~dp0
+    dir /b *.html
+    pause
+)
 
 echo.
 echo ========================================

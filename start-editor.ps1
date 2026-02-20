@@ -32,7 +32,14 @@ Start-Sleep -Seconds 3
 # Open the editor in default browser
 Write-Host "Opening editor in browser..." -ForegroundColor Yellow
 $editorPath = Join-Path $scriptDir "editor.html"
-Start-Process $editorPath
+if (Test-Path $editorPath) {
+    # Use Invoke-Item which reliably opens files with default application
+    Invoke-Item $editorPath
+} else {
+    Write-Host "ERROR: editor.html not found at $editorPath" -ForegroundColor Red
+    Read-Host "Press Enter to exit"
+    exit 1
+}
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
